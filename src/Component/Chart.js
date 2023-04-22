@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Bar, BarChart, Tooltip } from 'recharts';
 import moment from 'moment';
-// import ticker from 'ticker'
 
-function Chart() {
+function Chart({vName}) {
   const [coinList, setCoinList] = useState([]);
-  const [selectedCoin, setSelectedCoin] = useState(null);
+  const [selectedCoin, setSelectedCoin] = useState('');
   const [selectedCoinName, setSelectedCoinName] = useState('');
   const [chartData, setChartData] = useState([]);
-  const [chartType, setChartType] = useState('line')
+  const [chartType, setChartType] = useState('line');
   const [dateRange, setDateRange] = useState({ start: moment().subtract(1, 'month'), end: moment() });
-  // 
-  const [isTickerRunning, setIsTickerRunning] = useState([]);
+  // const ] = useState('USD');
 
   useEffect(() => {
     fetch('https://api.coingecko.com/api/v3/coins/list')
@@ -27,7 +25,7 @@ function Chart() {
     const endDate = moment(dateRange.end).unix();
 
     if (selectedCoin) {
-      fetch(`https://api.coingecko.com/api/v3/coins/${selectedCoin}/market_chart/range?vs_currency=usd&from=${startDate}&to=${endDate}`)
+      fetch(`https://api.coingecko.com/api/v3/coins/${selectedCoin}/market_chart/range?vs_currency=${vName}&from=${startDate}&to=${endDate}`)
         .then(response => response.json())
         .then(data => {
           const chartData = data.prices.map(price => {
@@ -38,11 +36,8 @@ function Chart() {
           setChartData(chartData);
         });
     }
-    startTicker();
-    return () => {
-      stopTicker();
-    };
-  }, [selectedCoin, dateRange]);
+
+  }, [selectedCoin, dateRange, vName]);
 
   const handleCoinChange = (event) => {
     const selectedCoinId = event.target.value;
@@ -74,57 +69,39 @@ function Chart() {
     }
   };
 
-
   const handleSelectChange = (e) => {
-    setChartType(e.target.value)
-  }
-
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      // your ticker logic here
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, [isTickerRunning]);
-
-  const startTicker = useCallback(() => {
-    if (!isTickerRunning) {
-      setIsTickerRunning(true);
-    }
-  }, [isTickerRunning]);
-
-  const stopTicker = useCallback(() => {
-    if (isTickerRunning) {
-      setIsTickerRunning(false);
-    }
-  }, [isTickerRunning]);
-
+    setChartType(e.target.value);
+  };
 
   return (
     <div>
-
-      <div className='d-flex justify-content-end me-1 mt-2' >
-
-        <select onChange={handleDateRangeChange} class="form-select form-select-lg mb-3" style={{ width: "120px" }}>
-          <option value="1day">1 day</option>
-          <option value="1week">1 week</option>
-          <option value="1month">1 month</option>
-          <option value="1year">1 year</option>
-        </select>
-        <select value={selectedCoin} onChange={handleCoinChange} class="form-select form-select-lg mb-3 ms-2" style={{ width: "120px" }}>
-          <option>Cryptocurrency</option>
-          {coinList.map((coin) => (
-            <option key={coin.id} value={coin.id}>
-              {coin.name}
-            </option>
-          ))}
-        </select>
-        <select value={chartType} onChange={handleSelectChange} class="form-select form-select-lg mb-3 ms-2" style={{ width: "150px" }} >
-          <option value="line">Line Chart</option>
-          <option value="bar">Bar Chart</option>
-          <option value="horizontalBar">Horizontal Bar Chart</option>
-        </select>
+      <div className='d-flex justify-content-between me-1 mt-2 ms-2'>
+        <div>
+          <h4><b style={{ color: "blue", width: "10px", height: "10px", borderRadius: '10px' }}>.</b>{vName}</h4>
+        </div>
+        <div className='d-flex'>
+          <select onChange={handleDateRangeChange} className="form-select form-select-lg mb-3" style={{ width: "120px" }}>
+            <option value="1day">1 day</option>
+            <option value="1week">1 week</option>
+            <option value="1month">1 month</option>
+            <option value="1year">1 year</option>
+          </select>
+          <select value={selectedCoin} onChange={handleCoinChange} class="form-select form-select-lg mb-3 ms-2" style={{ width: "120px" }}>
+            <option>Cryptocurrency</option>
+            {coinList && coinList.map((coin) => (
+              <option key={coin.id} value={coin.id}>
+                {coin.name}
+              </option>
+            ))}
+          </select>
+          <select value={chartType} onChange={handleSelectChange} class="form-select form-select-lg mb-3 ms-2" style={{ width: "150px" }} >
+            <option value="line">Line Chart</option>
+            <option value="bar">Bar Chart</option>
+            <option value="horizontalBar">Horizontal Bar Chart</option>
+          </select>
+        </div>
       </div>
+
       <div className='d-flex justify-content-end me-4' style={{ color: "blue" }}>
         <h5> {selectedCoinName}</h5>
       </div>
@@ -157,7 +134,7 @@ function Chart() {
           <BarChart layout="vertical" data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis type="number" />
-            <YAxis dataKey="date" tickFormatter={(unixTime) => moment.unix(unixTime).format("MMM YYYY")} type="category" />
+            <YAxis dataKey="date" tickFormatter={(unixTime) => moment.unix(unixTime).format(" DD MMMM")} type="category" />
             <Tooltip />
             <Bar dataKey="price" fill="#8884d8" />
           </BarChart>

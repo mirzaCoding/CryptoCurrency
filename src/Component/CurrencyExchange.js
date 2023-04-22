@@ -22,7 +22,8 @@ function CurrencyExchange() {
   function calculateNationalCurrencyAmount() {
     if (cryptoAmount && cryptoData[nationalCurrency] && cryptoData[convertedNationalCurrency]) {
       const exchangeRate = cryptoData[convertedNationalCurrency].value / cryptoData[nationalCurrency].value;
-      return cryptoAmount * exchangeRate;
+      const nationalCurrencyAmount = cryptoAmount * exchangeRate;
+    return nationalCurrencyAmount.toFixed(3);
     } else {
       return '';
     }
@@ -34,7 +35,7 @@ function CurrencyExchange() {
 
   //   function handleCryptoAmountChangee(e){
   //     setCryptoAmount(e.target.value)
-  //   }
+  //   }npm
 
   return (
     <div>
